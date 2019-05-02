@@ -4,41 +4,38 @@ On:
 - packages dependencies
 - use_scm
 """
+from collections import defaultdict
+from pathlib import Path
+
 from setuptools import setup
-import codecs
 import os
-import re
+from os import path
 
 here = os.path.abspath(os.path.dirname(__file__))
 
+# read the contents of your README file
+with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
-def read(*parts):
-    with codecs.open(os.path.join(here, *parts), 'r') as fp:
-        return fp.read()
-
-
-def find_version(*file_paths):
-    version_file = read(*file_paths)
-    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
-                              version_file, re.M)
-    if version_match:
-        return version_match.group(1)
-    raise RuntimeError("Unable to find version string.")
-
+requires = defaultdict(
+    list,
+    {
+        p.stem: p.read_text().split()
+        for p in Path('requirements').glob('*.pip')
+    }
+)
 
 setup(
     name='jsonschema2popo',
-    version=find_version("jsonschema2popo", "__init__.py"),
+    use_scm_version=True,
     description='Converts a JSON Schema to a Plain Old Python Object class',
-    long_description=read('README.md'),
+    long_description=long_description,
     long_description_content_type='text/markdown',
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Topic :: Software Development :: Build Tools",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
@@ -47,11 +44,14 @@ setup(
     author_email='yoyonel@hotmail.com',
     keywords='python json-schema code-generator',
     license='MIT License',
-    python_requires='>=3.4',
-    install_requires=[
-        'Jinja2>=2.10',
-        'networkx==1.9'
-    ],
+    python_requires='>=3.6',
+    install_requires=requires['base'],
+    setup_requires=requires['setup'],
+    extras_require={
+        'test': requires['test'],
+        'develop': requires['test'] + requires['dev'],
+        'docs': requires['docs']
+    },
     packages=["jsonschema2popo"],
     package_data={"jsonschema2popo": ["_class.tmpl"]},
     include_package_data=True,
