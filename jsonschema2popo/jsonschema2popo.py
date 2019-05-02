@@ -60,10 +60,11 @@ class JsonSchema2Popo:
             for dep in deps:
                 g.add_edge(model['name'], dep)
 
-        self.definitions = []
-        for model_name in networkx.topological_sort(g, reverse=True):
-            if model_name in models_map:
-                self.definitions.append(models_map[model_name])
+        self.definitions = [
+            models_map[model_name]
+            for model_name in networkx.topological_sort(g, reverse=True)
+            if model_name in models_map
+        ]
 
         # root object
         if 'title' in json_schema:
@@ -118,8 +119,8 @@ class JsonSchema2Popo:
                 if isinstance(t['items'], list):
                     if 'type' in t['items'][0]:
                         _subtype = self.J2P_TYPES[t['items'][0]['type']]
-                    elif '$ref' in t['items'][0] or 'oneOf' in t['items'][
-                        0] and len(t['items'][0]['oneOf']) == 1:
+                    elif '$ref' in t['items'][0] or 'oneOf' in t['items'][0] \
+                            and len(t['items'][0]['oneOf']) == 1:
                         if '$ref' in t['items'][0]:
                             ref = t['items'][0]['$ref']
                         else:

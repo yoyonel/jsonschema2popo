@@ -26,4 +26,4 @@ def test_jsonschema2popo(tmpdir_factory):
     ):
         main()
     # TODO: do some tests on generated python class from json schema
-    # => Functional tests
+    # => Functional tests on export python classes file
